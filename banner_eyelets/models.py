@@ -22,6 +22,7 @@ class RenderConfig:
     scaled_wrap_cm: float
     final_width_cm: float
     final_height_cm: float
+    scale_mode_label: str = "100%"
 
 
 DEFAULT_SETTINGS: Dict[str, Any] = {
