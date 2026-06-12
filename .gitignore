@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+settings.json
+*.pdf
+!tests/fixtures/*.pdf
