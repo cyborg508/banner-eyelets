@@ -1,0 +1,21 @@
+services:
+  banner-eyelets-web:
+    build: .
+    image: banner-eyelets-web:local
+    container_name: banner-eyelets-web
+    restart: unless-stopped
+    ports:
+      - "8801:8000"
+    volumes:
+      - banner-eyelets-data:/tmp/banner-eyelets-web
+    environment:
+      - BANNER_SESSIONS_DIR=/tmp/banner-eyelets-web
+    networks: [proxy]
+
+volumes:
+  banner-eyelets-data:
+
+networks:
+  proxy:
+    name: proxy-net
+    external: true
