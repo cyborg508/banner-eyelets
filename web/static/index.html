@@ -1,2 +1,117 @@
 <!DOCTYPE html>
-<html><body>Banner Eyelets</body></html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Banner Eyelets</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <h1>Banner Eyelets <span class="muted">— generator oczek</span></h1>
+</header>
+<main>
+  <!-- LEFT: controls -->
+  <section class="controls">
+
+    <!-- Drop zone -->
+    <div id="drop-zone" class="drop-zone">
+      <p id="drop-text">Przeciągnij plik PDF tutaj</p>
+      <button type="button" id="open-btn">Otwórz PDF</button>
+      <input type="file" id="file-input" accept=".pdf" hidden>
+    </div>
+
+    <!-- Info -->
+    <fieldset id="info-card" hidden>
+      <legend>Informacje</legend>
+      <div class="row"><span class="label">Plik</span><span id="info-name" class="mono val">—</span></div>
+      <div class="row"><span class="label">Strony</span><span id="info-pages" class="mono val">—</span></div>
+      <div class="row"><span class="label">Rozmiar z PDF</span><span id="info-size" class="mono val">—</span></div>
+    </fieldset>
+
+    <!-- Dimensions -->
+    <fieldset id="dims-card" hidden>
+      <legend>Wymiary</legend>
+      <div class="row"><span class="label">Wejście szer. [cm]</span><span id="in-w" class="mono val ro">—</span></div>
+      <div class="row"><span class="label">Wejście wys. [cm]</span><span id="in-h" class="mono val ro">—</span></div>
+      <div class="row">
+        <label class="label" for="out-w">Wyjście szer. [cm]</label>
+        <input type="number" id="out-w" step="0.01" min="0.1">
+      </div>
+      <div class="row">
+        <label class="label" for="out-h">Wyjście wys. [cm]</label>
+        <input type="number" id="out-h" step="0.01" min="0.1">
+      </div>
+    </fieldset>
+
+    <!-- Eyelets -->
+    <fieldset id="eyelets-card" hidden>
+      <legend>Oczka</legend>
+      <div class="row">
+        <label class="label" for="margin">Margines oczek [cm]</label>
+        <input type="number" id="margin" step="0.1" min="0.1" value="1.5">
+      </div>
+      <div class="row">
+        <label class="label" for="spacing">Docelowy odstęp [cm]</label>
+        <input type="number" id="spacing" step="1" min="1" value="50">
+      </div>
+      <div class="row">
+        <label class="label" for="marker">Rozmiar krzyżyka [cm]</label>
+        <input type="number" id="marker" step="0.1" min="0.1" value="1">
+      </div>
+    </fieldset>
+
+    <!-- Options -->
+    <fieldset id="opts-card" hidden>
+      <legend>Opcje</legend>
+      <div class="row">
+        <label><input type="checkbox" id="border"> Obramówka</label>
+      </div>
+      <div class="row">
+        <label><input type="checkbox" id="wrap"> Zawinięcie</label>
+      </div>
+      <div class="row" id="wrap-extra-row" hidden>
+        <label class="label" for="wrap-extra">Zawinięcie na stronę [cm]</label>
+        <input type="number" id="wrap-extra" step="0.5" min="0" value="3">
+      </div>
+      <div class="row">
+        <label><input type="checkbox" id="half"> 50% (parametry technologiczne)</label>
+      </div>
+    </fieldset>
+
+    <!-- Generate button -->
+    <div id="actions" hidden>
+      <button type="button" id="generate-btn">Generuj PDF z oczkami</button>
+    </div>
+
+    <!-- Points preview -->
+    <fieldset id="points-card" hidden>
+      <legend
+        id="points-toggle"
+        tabindex="0"
+        role="button"
+        aria-expanded="false"
+        style="cursor:pointer;user-select:none;"
+      >
+        <span id="points-count">Podgląd punktów</span>
+        <span id="points-arrow" aria-hidden="true"> ▶</span>
+      </legend>
+      <div id="points-list" class="points-list" hidden></div>
+    </fieldset>
+
+  </section>
+
+  <!-- RIGHT: preview -->
+  <section class="preview">
+    <fieldset class="preview-card">
+      <legend>Podgląd</legend>
+      <div class="preview-wrap">
+        <img id="preview-img" src="" alt="Podgląd bannera z oczkami" hidden>
+        <p id="preview-placeholder" class="placeholder">Załaduj PDF, aby zobaczyć podgląd</p>
+      </div>
+    </fieldset>
+  </section>
+</main>
+<script src="/static/app.js"></script>
+</body>
+</html>
