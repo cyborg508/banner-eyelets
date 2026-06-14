@@ -2,7 +2,39 @@ import pytest
 import fitz
 from pathlib import Path
 from banner_eyelets.models import BannerSpec, RenderConfig
-from banner_eyelets.pdf_ops import generate_annotated_pdf
+from banner_eyelets.pdf_ops import generate_annotated_pdf, frame_color_tuple
+
+
+def test_frame_color_tuple_basic():
+    assert frame_color_tuple("black") == (0.0, 0.0, 0.0)
+    assert frame_color_tuple("white") == (1.0, 1.0, 1.0)
+    assert frame_color_tuple("gray") == (0.5, 0.5, 0.5)
+
+
+def test_frame_color_tuple_cmyk():
+    # C / M / Y as true CMYK 4-tuples
+    assert frame_color_tuple("c") == (1.0, 0.0, 0.0, 0.0)
+    assert frame_color_tuple("m") == (0.0, 1.0, 0.0, 0.0)
+    assert frame_color_tuple("y") == (0.0, 0.0, 1.0, 0.0)
+
+
+def test_frame_color_tuple_unknown_defaults_gray():
+    assert frame_color_tuple("nonsense") == (0.5, 0.5, 0.5)
+
+
+def test_generate_accepts_new_thickness_params(sample_pdf, basic_spec, basic_render):
+    result = generate_annotated_pdf(
+        sample_pdf,
+        basic_spec,
+        basic_render,
+        border=True,
+        frame_line_width_pt=2.8,
+        frame_halo_width_pt=2.8,
+        frame_halo_color=(1.0, 0.0, 0.0, 0.0),
+        cross_line_width_pt=3.4,
+    )
+    assert isinstance(result, bytes)
+    assert result[:4] == b"%PDF"
 
 
 @pytest.fixture

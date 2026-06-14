@@ -59,6 +59,10 @@
         <label class="label" for="marker">Rozmiar krzyżyka [cm]</label>
         <input type="number" id="marker" step="0.1" min="0.1" value="1">
       </div>
+      <div class="row">
+        <label class="label" for="cross-mm">Grubość krzyżyka [mm]</label>
+        <input type="number" id="cross-mm" step="0.1" min="0.1" value="1.2">
+      </div>
     </fieldset>
 
     <!-- Options -->
@@ -76,6 +80,26 @@
       </div>
       <div class="row">
         <label><input type="checkbox" id="half"> 50% (parametry technologiczne)</label>
+      </div>
+      <hr>
+      <div class="row">
+        <label class="label" for="frame-line-mm">Grubość granicy obrysu [mm]</label>
+        <input type="number" id="frame-line-mm" step="0.1" min="0.1" value="1">
+      </div>
+      <div class="row">
+        <label class="label" for="frame-halo-mm">Grubość obwódki [mm]</label>
+        <input type="number" id="frame-halo-mm" step="0.1" min="0" value="1">
+      </div>
+      <div class="row">
+        <label class="label" for="frame-color">Kolor obwódki</label>
+        <select id="frame-color">
+          <option value="gray" selected>Szary</option>
+          <option value="black">Czarny</option>
+          <option value="white">Biały</option>
+          <option value="c">C (cyan)</option>
+          <option value="m">M (magenta)</option>
+          <option value="y">Y (yellow)</option>
+        </select>
       </div>
     </fieldset>
 

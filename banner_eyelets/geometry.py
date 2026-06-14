@@ -16,6 +16,10 @@ def pt_to_cm(value_pt: float) -> float:
     return value_pt / POINTS_PER_CM
 
 
+def mm_to_pt(value_mm: float) -> float:
+    return value_mm / 10.0 * POINTS_PER_CM
+
+
 def evenly_spaced_positions(
     length_cm: float, margin_cm: float, target_spacing_cm: float
 ) -> List[float]:

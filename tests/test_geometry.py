@@ -3,10 +3,21 @@ import pytest
 from banner_eyelets.geometry import (
     cm_to_pt,
     pt_to_cm,
+    mm_to_pt,
     evenly_spaced_positions,
     build_eyelet_points,
     POINTS_PER_CM,
 )
+
+
+def test_mm_to_pt_known_value():
+    # 25.4 mm == 1 inch == 72 pt
+    assert abs(mm_to_pt(25.4) - 72.0) < 1e-6
+
+
+def test_mm_to_pt_one_mm():
+    # 1 mm == 0.1 cm
+    assert abs(mm_to_pt(1.0) - cm_to_pt(0.1)) < 1e-9
 
 
 def test_cm_to_pt_round_trip():

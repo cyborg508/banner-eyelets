@@ -9,8 +9,9 @@ from fastapi import Cookie, FastAPI, File, HTTPException, Response, UploadFile
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
+from banner_eyelets.geometry import mm_to_pt
 from banner_eyelets.models import BannerSpec, RenderConfig
-from banner_eyelets.pdf_ops import generate_annotated_pdf
+from banner_eyelets.pdf_ops import frame_color_tuple, generate_annotated_pdf
 from web.sessions import SessionStore
 
 PREVIEW_MAX_PX = 900
@@ -36,6 +37,23 @@ def build_render_config(
         final_width_cm=out_w + 2 * scaled_wrap,
         final_height_cm=out_h + 2 * scaled_wrap,
     )
+
+
+def build_marker_kwargs(
+    half: bool,
+    frame_line_mm: float,
+    frame_halo_mm: float,
+    frame_color: str,
+    cross_mm: float,
+) -> dict:
+    """Grubości w mm → punkty (ze skalą 50% jak inne parametry technologiczne)."""
+    factor = 0.5 if half else 1.0
+    return {
+        "frame_line_width_pt": mm_to_pt(frame_line_mm * factor),
+        "frame_halo_width_pt": mm_to_pt(frame_halo_mm * factor),
+        "frame_halo_color": frame_color_tuple(frame_color),
+        "cross_line_width_pt": mm_to_pt(cross_mm * factor),
+    }
 
 
 def create_app(store: SessionStore) -> FastAPI:
@@ -114,12 +132,17 @@ def create_app(store: SessionStore) -> FastAPI:
         wrap: bool = False,
         half: bool = False,
         wrap_extra: float = 3.0,
+        frame_line_mm: float = 1.0,
+        frame_halo_mm: float = 1.0,
+        frame_color: str = "gray",
+        cross_mm: float = 1.2,
     ) -> Response:
         entry, spec, render_cfg = _common_params(
             sid, out_w, out_h, margin, spacing, marker, border, wrap, half, wrap_extra
         )
         pdf_bytes = generate_annotated_pdf(
-            entry["path"], spec, render_cfg, border=border, wrap=wrap
+            entry["path"], spec, render_cfg, border=border, wrap=wrap,
+            **build_marker_kwargs(half, frame_line_mm, frame_halo_mm, frame_color, cross_mm),
         )
         doc = fitz.open("pdf", pdf_bytes)
         page = doc[0]
@@ -140,12 +163,17 @@ def create_app(store: SessionStore) -> FastAPI:
         wrap: bool = False,
         half: bool = False,
         wrap_extra: float = 3.0,
+        frame_line_mm: float = 1.0,
+        frame_halo_mm: float = 1.0,
+        frame_color: str = "gray",
+        cross_mm: float = 1.2,
     ) -> Response:
         entry, spec, render_cfg = _common_params(
             sid, out_w, out_h, margin, spacing, marker, border, wrap, half, wrap_extra
         )
         pdf_bytes = generate_annotated_pdf(
-            entry["path"], spec, render_cfg, border=border, wrap=wrap
+            entry["path"], spec, render_cfg, border=border, wrap=wrap,
+            **build_marker_kwargs(half, frame_line_mm, frame_halo_mm, frame_color, cross_mm),
         )
         return Response(
             content=pdf_bytes,
