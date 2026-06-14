@@ -62,6 +62,17 @@ def create_app(store: SessionStore) -> FastAPI:
 
     app = FastAPI(title="banner-eyelets web", lifespan=lifespan)
 
+    @app.middleware("http")
+    async def force_revalidate_static(request, call_next):
+        # Bez tego przeglądarki cache'ują /static/app.js heurystycznie i po
+        # aktualizacji serwują starą wersję. "no-cache" wymusza rewalidację
+        # przez ETag (304 gdy bez zmian, świeży plik gdy zmieniony).
+        response = await call_next(request)
+        path = request.url.path
+        if path == "/" or path.startswith("/static/"):
+            response.headers["Cache-Control"] = "no-cache"
+        return response
+
     _static = Path(__file__).parent / "static"
     app.mount("/static", StaticFiles(directory=str(_static)), name="static")
 

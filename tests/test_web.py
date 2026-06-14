@@ -99,3 +99,17 @@ def test_index_returns_html(client):
     r = client.get("/")
     assert r.status_code == 200
     assert "text/html" in r.headers["content-type"]
+
+
+def test_static_assets_force_revalidation(client):
+    """Statyki muszą wymuszać rewalidację, inaczej przeglądarki serwują stary app.js."""
+    r = client.get("/static/app.js")
+    assert r.status_code == 200
+    assert "no-cache" in r.headers.get("cache-control", "")
+
+
+def test_index_cache_busts_static(client):
+    """index.html odwołuje się do statyk z parametrem wersji (cache-busting)."""
+    r = client.get("/")
+    assert "app.js?v=" in r.text
+    assert "style.css?v=" in r.text
