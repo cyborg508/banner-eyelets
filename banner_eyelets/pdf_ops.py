@@ -60,20 +60,21 @@ def draw_frame(
     rect: fitz.Rect,
     base_width_pt: float = 2.4,
     line_width_pt: float | None = None,
-    halo_width_pt: float | None = None,
-    halo_color: Sequence[float] = (1.0, 1.0, 1.0),
+    line_color: Sequence[float] = (0.0, 0.0, 0.0),
 ) -> None:
     if line_width_pt is not None:
-        # granica obrysu = czarna linia; obwódka = otoczka po każdej stronie linii.
-        inner_width = max(2.0, line_width_pt)
-        halo = halo_width_pt if halo_width_pt is not None else 0.0
-        outline_width = max(5.5, inner_width + 2.0 * halo)
-    else:
-        outline_width = max(5.5, base_width_pt * 2.2)
-        inner_width = max(2.0, base_width_pt)
+        # Obramówka = JEDNA linia w zadanym kolorze i grubości.
+        shape = page.new_shape()
+        shape.draw_rect(rect)
+        shape.finish(color=tuple(line_color), width=max(0.1, line_width_pt))
+        shape.commit()
+        return
+    # Tryb legacy (desktop): biała otoczka + czarna linia.
+    outline_width = max(5.5, base_width_pt * 2.2)
+    inner_width = max(2.0, base_width_pt)
     shape = page.new_shape()
     shape.draw_rect(rect)
-    shape.finish(color=tuple(halo_color), width=outline_width)
+    shape.finish(color=(1, 1, 1), width=outline_width)
     shape.draw_rect(rect)
     shape.finish(color=(0, 0, 0), width=inner_width)
     shape.commit()
@@ -89,8 +90,7 @@ def generate_annotated_pdf(
     cross_outline_multiplier: float = 0.32,
     cross_inner_multiplier: float = 0.16,
     frame_line_width_pt: float | None = None,
-    frame_halo_width_pt: float | None = None,
-    frame_halo_color: Sequence[float] = (1.0, 1.0, 1.0),
+    frame_color: Sequence[float] = (0.0, 0.0, 0.0),
     cross_line_width_pt: float | None = None,
 ) -> bytes:
     src_doc = fitz.open(str(src_path))
@@ -125,16 +125,14 @@ def generate_annotated_pdf(
         draw_frame(
             dst_page, inner_rect, frame_base_width_pt,
             line_width_pt=frame_line_width_pt,
-            halo_width_pt=frame_halo_width_pt,
-            halo_color=frame_halo_color,
+            line_color=frame_color,
         )
         if wrap:
             outer_rect = fitz.Rect(0, 0, final_width_pt, final_height_pt)
             draw_frame(
                 dst_page, outer_rect, frame_base_width_pt,
                 line_width_pt=frame_line_width_pt,
-                halo_width_pt=frame_halo_width_pt,
-                halo_color=frame_halo_color,
+                line_color=frame_color,
             )
 
     points_cm = build_eyelet_points(

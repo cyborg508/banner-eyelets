@@ -64,10 +64,9 @@ function getParams() {
     wrap:       wrapCheck.checked,
     half:       document.getElementById('half').checked,
     wrap_extra: parseFloat(document.getElementById('wrap-extra').value) || 3,
-    frame_line_mm: parseFloat(document.getElementById('frame-line-mm').value) || 1,
-    frame_halo_mm: parseFloat(document.getElementById('frame-halo-mm').value) || 0,
-    frame_color:   document.getElementById('frame-color').value || 'gray',
-    cross_mm:      parseFloat(document.getElementById('cross-mm').value) || 1.2,
+    frame_mm:    parseFloat(document.getElementById('frame-mm').value) || 1,
+    frame_color: document.getElementById('frame-color').value || 'gray',
+    cross_mm:    parseFloat(document.getElementById('cross-mm').value) || 1.2,
   };
 }
 

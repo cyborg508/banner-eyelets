@@ -68,7 +68,7 @@ def test_preview_accepts_new_params(client, sample_pdf_bytes):
     client.post("/api/upload", files={"file": ("test.pdf", sample_pdf_bytes, "application/pdf")})
     r = client.get(
         "/api/preview?out_w=21&out_h=29.7&margin=1.5&spacing=50&marker=1"
-        "&border=true&frame_line_mm=1&frame_halo_mm=1&frame_color=c&cross_mm=1.2"
+        "&border=true&frame_mm=1&frame_color=c&cross_mm=1.2"
     )
     assert r.status_code == 200
     assert r.content[:4] == b"\x89PNG"
@@ -78,7 +78,7 @@ def test_generate_accepts_new_params(client, sample_pdf_bytes):
     client.post("/api/upload", files={"file": ("test.pdf", sample_pdf_bytes, "application/pdf")})
     r = client.get(
         "/api/generate?out_w=21&out_h=29.7&margin=1.5&spacing=50&marker=1"
-        "&border=true&frame_line_mm=1&frame_halo_mm=1&frame_color=gray&cross_mm=1.2"
+        "&border=true&frame_mm=1&frame_color=gray&cross_mm=1.2"
     )
     assert r.status_code == 200
     assert r.content[:4] == b"%PDF"

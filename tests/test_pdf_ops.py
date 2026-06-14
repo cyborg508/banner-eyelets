@@ -1,6 +1,7 @@
 import pytest
 import fitz
 from pathlib import Path
+from banner_eyelets.geometry import cm_to_pt
 from banner_eyelets.models import BannerSpec, RenderConfig
 from banner_eyelets.pdf_ops import generate_annotated_pdf, frame_color_tuple
 
@@ -29,12 +30,37 @@ def test_generate_accepts_new_thickness_params(sample_pdf, basic_spec, basic_ren
         basic_render,
         border=True,
         frame_line_width_pt=2.8,
-        frame_halo_width_pt=2.8,
-        frame_halo_color=(1.0, 0.0, 0.0, 0.0),
+        frame_color=(1.0, 0.0, 0.0, 0.0),
         cross_line_width_pt=3.4,
     )
     assert isinstance(result, bytes)
     assert result[:4] == b"%PDF"
+
+
+def test_frame_is_single_colored_line(sample_pdf, basic_spec):
+    """Obramówka = jedna linia w zadanym kolorze; BEZ czarnej linii na wierzchu."""
+    render = RenderConfig(
+        scaled_margin_cm=1.5, scaled_spacing_cm=50.0, scaled_marker_size_cm=1.0,
+        scaled_wrap_cm=3.0, final_width_cm=27.0, final_height_cm=35.7,
+    )
+    pdf = generate_annotated_pdf(
+        sample_pdf, basic_spec, render, wrap=True,
+        frame_line_width_pt=cm_to_pt(0.3),  # ~3mm, dobrze widoczna
+        frame_color=(1.0, 0.0, 0.0, 0.0),  # cyan CMYK
+    )
+    doc = fitz.open("pdf", pdf)
+    pix = doc[0].get_pixmap(matrix=fitz.Matrix(4, 4))
+    x = pix.width // 2
+    # pasmo ramki wewnętrznej (wrap 3cm na 35.7cm) ~ 8–9% wysokości od góry
+    band = [pix.pixel(x, y) for y in range(int(pix.height * 0.07), int(pix.height * 0.11))]
+    nonwhite = [px for px in band if px != (255, 255, 255)]
+    assert nonwhite, "Ramka nie została narysowana w spodziewanym pasmie"
+    # jest cyan (niski R, wysoki B)
+    assert any(r < 80 and b > 150 for r, g, b in nonwhite), f"Brak cyan w ramce: {nonwhite}"
+    # NIE ma czarnego rdzenia (pojedyncza linia, nie halo+czarna)
+    assert not any(r < 30 and g < 30 and b < 30 for r, g, b in nonwhite), \
+        f"Ramka ma czarny rdzeń (powinna być jedną linią): {nonwhite}"
+    doc.close()
 
 
 @pytest.fixture
