@@ -144,12 +144,15 @@ def create_app(store: SessionStore) -> FastAPI:
         frame_mm: float = 1.0,
         frame_color: str = "gray",
         cross_mm: float = 1.2,
+        scale_w: float | None = None,
+        scale_h: float | None = None,
     ) -> Response:
         entry, spec, render_cfg = _common_params(
             sid, out_w, out_h, margin, spacing, marker, border, wrap, half, wrap_extra
         )
         pdf_bytes = generate_annotated_pdf(
             entry["path"], spec, render_cfg, border=border, wrap=wrap,
+            artwork_width_cm=scale_w, artwork_height_cm=scale_h,
             **build_marker_kwargs(half, frame_mm, frame_color, cross_mm),
         )
         doc = fitz.open("pdf", pdf_bytes)
@@ -174,12 +177,15 @@ def create_app(store: SessionStore) -> FastAPI:
         frame_mm: float = 1.0,
         frame_color: str = "gray",
         cross_mm: float = 1.2,
+        scale_w: float | None = None,
+        scale_h: float | None = None,
     ) -> Response:
         entry, spec, render_cfg = _common_params(
             sid, out_w, out_h, margin, spacing, marker, border, wrap, half, wrap_extra
         )
         pdf_bytes = generate_annotated_pdf(
             entry["path"], spec, render_cfg, border=border, wrap=wrap,
+            artwork_width_cm=scale_w, artwork_height_cm=scale_h,
             **build_marker_kwargs(half, frame_mm, frame_color, cross_mm),
         )
         return Response(

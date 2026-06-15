@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Banner Eyelets</title>
-  <link rel="stylesheet" href="/static/style.css?v=2">
+  <link rel="stylesheet" href="/static/style.css?v=3">
 </head>
 <body>
 <header>
@@ -34,6 +34,24 @@
       <legend>Wymiary</legend>
       <div class="row"><span class="label">Wejście szer. [cm]</span><span id="in-w" class="mono val ro">—</span></div>
       <div class="row"><span class="label">Wejście wys. [cm]</span><span id="in-h" class="mono val ro">—</span></div>
+      <hr>
+      <div class="row">
+        <span class="label">Skalowanie</span>
+        <label><input type="checkbox" id="scale-prop" checked> proporcjonalnie</label>
+      </div>
+      <div class="row">
+        <label class="label" for="scale-w">Skala szer. [cm]</label>
+        <input type="number" id="scale-w" step="0.01" min="0.1">
+      </div>
+      <div class="row">
+        <label class="label" for="scale-h">Skala wys. [cm]</label>
+        <input type="number" id="scale-h" step="0.01" min="0.1">
+      </div>
+      <div class="row">
+        <label class="label" for="scale-pct">Skala [%]</label>
+        <input type="number" id="scale-pct" step="1" min="1" value="100">
+      </div>
+      <hr>
       <div class="row">
         <label class="label" for="out-w">Wyjście szer. [cm]</label>
         <input type="number" id="out-w" step="0.01" min="0.1">
@@ -132,6 +150,6 @@
     </fieldset>
   </section>
 </main>
-<script src="/static/app.js?v=2"></script>
+<script src="/static/app.js?v=3"></script>
 </body>
 </html>

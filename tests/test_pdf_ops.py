@@ -3,7 +3,77 @@ import fitz
 from pathlib import Path
 from banner_eyelets.geometry import cm_to_pt
 from banner_eyelets.models import BannerSpec, RenderConfig
-from banner_eyelets.pdf_ops import generate_annotated_pdf, frame_color_tuple
+from banner_eyelets.pdf_ops import generate_annotated_pdf, frame_color_tuple, centered_rect
+
+
+def test_centered_rect_centers_content():
+    r = centered_rect(0.0, 0.0, 100.0, 100.0, 40.0, 60.0)
+    assert (r.x0, r.y0, r.x1, r.y1) == (30.0, 20.0, 70.0, 80.0)
+
+
+def test_centered_rect_with_offset():
+    r = centered_rect(10.0, 5.0, 100.0, 100.0, 100.0, 100.0)
+    assert (r.x0, r.y0, r.x1, r.y1) == (10.0, 5.0, 110.0, 105.0)
+
+
+def _red_source(tmp_path):
+    doc = fitz.open()
+    page = doc.new_page(width=300.0, height=300.0)
+    page.draw_rect(page.rect, color=(1, 0, 0), fill=(1, 0, 0))
+    path = tmp_path / "red.pdf"
+    doc.save(str(path))
+    doc.close()
+    return path
+
+
+def _red_fraction(pdf_bytes):
+    doc = fitz.open("pdf", pdf_bytes)
+    pix = doc[0].get_pixmap()
+    xs, ys = [], []
+    for y in range(pix.height):
+        for x in range(pix.width):
+            r, g, b = pix.pixel(x, y)
+            if r > 200 and g < 80 and b < 80:
+                xs.append(x)
+                ys.append(y)
+    doc.close()
+    assert xs, "brak czerwieni w wyniku"
+    return (
+        (max(xs) - min(xs)) / pix.width,
+        (max(ys) - min(ys)) / pix.height,
+        min(xs) / pix.width,
+    )
+
+
+def _square_render(scaled_w_cm, scaled_h_cm, tmp_path):
+    src = _red_source(tmp_path)
+    spec = BannerSpec(input_width_cm=10.0, input_height_cm=10.0,
+                      output_width_cm=10.0, output_height_cm=10.0)
+    render = RenderConfig(scaled_margin_cm=1.5, scaled_spacing_cm=50.0,
+                          scaled_marker_size_cm=1.0, scaled_wrap_cm=0.0,
+                          final_width_cm=10.0, final_height_cm=10.0)
+    return generate_annotated_pdf(src, spec, render,
+                                  artwork_width_cm=scaled_w_cm,
+                                  artwork_height_cm=scaled_h_cm)
+
+
+def test_artwork_scaled_smaller_is_centered(tmp_path):
+    w_frac, h_frac, left_frac = _red_fraction(_square_render(5.0, 5.0, tmp_path))
+    assert 0.45 < w_frac < 0.55, w_frac      # 5cm z 10cm ≈ połowa
+    assert 0.45 < h_frac < 0.55, h_frac
+    assert 0.2 < left_frac < 0.3, left_frac  # wyśrodkowane: margines ≈ 25%
+
+
+def test_artwork_default_none_fills_input(tmp_path):
+    src = _red_source(tmp_path)
+    spec = BannerSpec(input_width_cm=10.0, input_height_cm=10.0,
+                      output_width_cm=10.0, output_height_cm=10.0)
+    render = RenderConfig(scaled_margin_cm=1.5, scaled_spacing_cm=50.0,
+                          scaled_marker_size_cm=1.0, scaled_wrap_cm=0.0,
+                          final_width_cm=10.0, final_height_cm=10.0)
+    pdf = generate_annotated_pdf(src, spec, render)  # bez skalowania
+    w_frac, h_frac, _ = _red_fraction(pdf)
+    assert w_frac > 0.9 and h_frac > 0.9      # wejście=wyjście → wypełnia arkusz
 
 
 def test_frame_color_tuple_basic():

@@ -29,6 +29,20 @@ def frame_color_tuple(name: str) -> Tuple[float, ...]:
     return FRAME_COLORS.get((name or "").strip().lower(), FRAME_COLORS["gray"])
 
 
+def centered_rect(
+    left_pt: float,
+    top_pt: float,
+    region_w_pt: float,
+    region_h_pt: float,
+    content_w_pt: float,
+    content_h_pt: float,
+) -> fitz.Rect:
+    """Prostokąt o rozmiarze content, wyśrodkowany w regionie (left, top, region)."""
+    ox = left_pt + (region_w_pt - content_w_pt) / 2.0
+    oy = top_pt + (region_h_pt - content_h_pt) / 2.0
+    return fitz.Rect(ox, oy, ox + content_w_pt, oy + content_h_pt)
+
+
 def draw_cross(
     page: fitz.Page,
     x_pt: float,
@@ -92,6 +106,8 @@ def generate_annotated_pdf(
     frame_line_width_pt: float | None = None,
     frame_color: Sequence[float] = (0.0, 0.0, 0.0),
     cross_line_width_pt: float | None = None,
+    artwork_width_cm: float | None = None,
+    artwork_height_cm: float | None = None,
 ) -> bytes:
     src_doc = fitz.open(str(src_path))
 
@@ -111,12 +127,16 @@ def generate_annotated_pdf(
     base_right = base_left + base_output_width_pt
     base_bottom = base_top + base_output_height_pt
 
-    offset_x = base_left + (base_output_width_pt - input_width_pt) / 2.0
-    offset_y = base_top + (base_output_height_pt - input_height_pt) / 2.0
-    target_rect = fitz.Rect(
-        offset_x, offset_y,
-        offset_x + input_width_pt,
-        offset_y + input_height_pt,
+    artwork_width_pt = (
+        cm_to_pt(artwork_width_cm) if artwork_width_cm is not None else input_width_pt
+    )
+    artwork_height_pt = (
+        cm_to_pt(artwork_height_cm) if artwork_height_cm is not None else input_height_pt
+    )
+    target_rect = centered_rect(
+        base_left, base_top,
+        base_output_width_pt, base_output_height_pt,
+        artwork_width_pt, artwork_height_pt,
     )
     dst_page.show_pdf_page(target_rect, src_doc, 0, keep_proportion=False, overlay=False)
 

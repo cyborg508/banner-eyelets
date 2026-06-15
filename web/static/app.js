@@ -29,6 +29,8 @@ function buildEyeletPoints(outW, outH, margin, spacing) {
 // ── State ───────────────────────────────────────────────────────────────────
 let uploadedFileName = '';
 let debounceTimer = null;
+let inputW = 0;   // wymiar wejściowy PDF (baza skalowania %)
+let inputH = 0;
 
 // ── DOM refs ────────────────────────────────────────────────────────────────
 const dropZone       = document.getElementById('drop-zone');
@@ -67,6 +69,8 @@ function getParams() {
     frame_mm:    parseFloat(document.getElementById('frame-mm').value) || 1,
     frame_color: document.getElementById('frame-color').value || 'gray',
     cross_mm:    parseFloat(document.getElementById('cross-mm').value) || 1.2,
+    scale_w:     parseFloat(document.getElementById('scale-w').value) || inputW || 1,
+    scale_h:     parseFloat(document.getElementById('scale-h').value) || inputH || 1,
   };
 }
 
@@ -86,6 +90,12 @@ function unlockUI(fileName, pages, widthCm, heightCm) {
   document.getElementById('in-h').textContent = heightCm.toFixed(2);
   document.getElementById('out-w').value = widthCm.toFixed(2);
   document.getElementById('out-h').value = heightCm.toFixed(2);
+  inputW = widthCm;
+  inputH = heightCm;
+  document.getElementById('scale-w').value = widthCm.toFixed(2);
+  document.getElementById('scale-h').value = heightCm.toFixed(2);
+  document.getElementById('scale-pct').value = 100;
+  document.getElementById('scale-pct').disabled = !document.getElementById('scale-prop').checked;
   dropText.textContent = `Załadowano: ${fileName}`;
   for (const el of [infoCard, dimsCard, eyeletsCard, optsCard, actionsDiv, pointsCard]) {
     el.removeAttribute('hidden');
@@ -155,6 +165,44 @@ wrapCheck.addEventListener('change', () => {
 document.querySelectorAll('input[type=number], input[type=checkbox], select').forEach(el => {
   el.addEventListener('input',  () => { schedulePreview(); updatePointsList(); });
   el.addEventListener('change', () => { schedulePreview(); updatePointsList(); });
+});
+
+// ── Skalowanie: powiązanie % ↔ cm ↔ proporcja ───────────────────────────────
+const scaleW    = document.getElementById('scale-w');
+const scaleH    = document.getElementById('scale-h');
+const scalePct  = document.getElementById('scale-pct');
+const scaleProp = document.getElementById('scale-prop');
+const r2 = v => (Math.round(v * 100) / 100).toFixed(2);
+const r1 = v => Math.round(v * 10) / 10;
+
+scalePct.addEventListener('input', () => {
+  if (!scaleProp.checked || !inputW || !inputH) return;
+  const pct = parseFloat(scalePct.value) || 100;
+  scaleW.value = r2(inputW * pct / 100);
+  scaleH.value = r2(inputH * pct / 100);
+});
+scaleW.addEventListener('input', () => {
+  if (!scaleProp.checked || !inputW) return;
+  const w = parseFloat(scaleW.value); if (!w) return;
+  const pct = w / inputW * 100;
+  scalePct.value = r1(pct);
+  scaleH.value = r2(inputH * pct / 100);
+});
+scaleH.addEventListener('input', () => {
+  if (!scaleProp.checked || !inputH) return;
+  const h = parseFloat(scaleH.value); if (!h) return;
+  const pct = h / inputH * 100;
+  scalePct.value = r1(pct);
+  scaleW.value = r2(inputW * pct / 100);
+});
+scaleProp.addEventListener('change', () => {
+  scalePct.disabled = !scaleProp.checked;
+  if (scaleProp.checked && inputW) {           // przy włączeniu: zsynchronizuj wg szerokości
+    const w = parseFloat(scaleW.value) || inputW;
+    const pct = w / inputW * 100;
+    scalePct.value = r1(pct);
+    scaleH.value = r2(inputH * pct / 100);
+  }
 });
 
 // ── Generate ─────────────────────────────────────────────────────────────────

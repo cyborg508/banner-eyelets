@@ -101,6 +101,20 @@ def test_index_returns_html(client):
     assert "text/html" in r.headers["content-type"]
 
 
+def test_preview_accepts_scale_params(client, sample_pdf_bytes):
+    client.post("/api/upload", files={"file": ("test.pdf", sample_pdf_bytes, "application/pdf")})
+    r = client.get("/api/preview?out_w=21&out_h=29.7&scale_w=10&scale_h=14")
+    assert r.status_code == 200
+    assert r.content[:4] == b"\x89PNG"
+
+
+def test_generate_accepts_scale_params(client, sample_pdf_bytes):
+    client.post("/api/upload", files={"file": ("test.pdf", sample_pdf_bytes, "application/pdf")})
+    r = client.get("/api/generate?out_w=21&out_h=29.7&scale_w=10&scale_h=14")
+    assert r.status_code == 200
+    assert r.content[:4] == b"%PDF"
+
+
 def test_static_assets_force_revalidation(client):
     """Statyki muszą wymuszać rewalidację, inaczej przeglądarki serwują stary app.js."""
     r = client.get("/static/app.js")
